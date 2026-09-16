@@ -7,14 +7,15 @@
 // ==========================================
 
 // ★作成したGASの「ウェブアプリURL」を入力してください
-const GAS_WEB_APP_URL = "YOUR_GAS_WEB_APP_URL_HERE";
+const GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxJk1q9uBGcmb7N00EGJTLUKHk5QRSjyrBgYYloPVnXFgxdMPGOarhCQVlf-xQI7e9BWQ/exec";
 
 // メニュー設定 (品目名と単価を変更・追加できます)
 // スプレッドシートの列順と一致させておくと管理がスムーズです。
 const menuItems = [
-    { id: "item_a", name: "フランクフルト", price: 200 },
-    { id: "item_b", name: "焼きそば", price: 300 },
-    { id: "item_c", name: "ジュース", price: 100 }
+    { id: "item_a", name: "フライドポテト", price: 200 },
+    { id: "item_b", name: "クレープ１", price: 300 },
+    { id: "item_c", name: "クレープ２", price: 100 },
+    { id: "item_d", name: "アイストッピング", price: 100 }
 ];
 
 // 注文データ管理用オブジェクト
