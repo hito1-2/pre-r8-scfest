@@ -15,10 +15,9 @@ const TICKET_UNIT_PRICE = 50;
 // メニュー設定 (品目名と単価を変更・追加できます)
 // スプレッドシートの列順と一致させておくと管理がスムーズです。
 const menuItems = [
-    { id: "item_a", name: "フライドポテト", price: 200 },
-    { id: "item_b", name: "クレープ１", price: 300 },
-    { id: "item_c", name: "クレープ２", price: 100 },
-    { id: "item_d", name: "アイストッピング", price: 100 }
+    { id: "item_a", name: "ポテト", price: 150 },
+    { id: "item_b", name: "バナナチョコクレープ", price: 200 },
+    { id: "item_d", name: "アイストッピング", price: 50 }
 ];
 
 // 注文データ管理用オブジェクト
