@@ -9,6 +9,9 @@
 // ★作成したGASの「ウェブアプリURL」を入力してください
 const GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxJk1q9uBGcmb7N00EGJTLUKHk5QRSjyrBgYYloPVnXFgxdMPGOarhCQVlf-xQI7e9BWQ/exec";
 
+// ★追加: 金券の1枚あたりの額面 (50円)
+const TICKET_UNIT_PRICE = 50;
+
 // メニュー設定 (品目名と単価を変更・追加できます)
 // スプレッドシートの列順と一致させておくと管理がスムーズです。
 const menuItems = [
@@ -89,7 +92,7 @@ function updateQuantityDirectly(itemId, value) {
     calculateTotal();
 }
 
-// 合計金額の計算
+// 合計金額および金券枚数の計算
 function calculateTotal() {
     let total = 0;
     menuItems.forEach(item => {
@@ -97,7 +100,18 @@ function calculateTotal() {
         total += item.price * qty;
     });
 
+    // 50円金券の必要枚数を計算 (万が一端数が出た場合を考慮して切り上げ)
+    const ticketCount = Math.ceil(total / TICKET_UNIT_PRICE);
+
+    // 画面の更新
     document.getElementById("total-amount").textContent = total.toLocaleString();
+    
+    // ★追加: 必要金券枚数の表示更新
+    const ticketElem = document.getElementById("ticket-count");
+    if (ticketElem) {
+        ticketElem.textContent = ticketCount.toLocaleString();
+    }
+
     return total;
 }
 
@@ -149,7 +163,7 @@ async function submitOrder() {
     submitBtn.disabled = true;
     setStatus("送信中...", "info");
 
-    // 送信データの整形
+    // 送信データの整形 (スプレッドシート連携用)
     const payload = {
         totalAmount: totalAmount,
         items: menuItems.map(item => ({
