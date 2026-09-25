@@ -11,3 +11,4 @@ https://docs.google.com/spreadsheets/d/18BsQaiyHCnNE8SpnwPJP4gDF_SKURpKJZSKtQrdH
 - https://share.gemini.google/k07RFGllE6uP
 - https://gemini.google.com/share/d/1T925kg3KXx8JeflhwPWn2BjLT0ICqoSM
 - https://ai.rakuten.co.jp/share/6ab67f91aa01ac2ac981ca49?utm_source=copylink
+- https://share.gemini.google/5WnubQpsRAYi

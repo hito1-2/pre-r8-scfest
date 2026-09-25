@@ -111,7 +111,32 @@ function calculateTotal() {
         ticketElem.textContent = ticketCount.toLocaleString();
     }
 
+    // ★追加: アイストッピングの制約判定処理
+    checkIceQuantityConstraint();
+
     return total;
+}
+
+// アイストッピングの数量チェック・画面警告表示
+function checkIceQuantityConstraint() {
+    const crepeQty = orderState["item_b"] || 0; // バナナチョコクレープ
+    const iceQty = orderState["item_d"] || 0;   // アイストッピング
+    const warningElem = document.getElementById("ice-warning");
+    const submitBtn = document.getElementById("submit-btn");
+
+    if (iceQty > crepeQty) {
+        if (warningElem) {
+            warningElem.textContent = `⚠️ アイストッピング(${iceQty}個)はバナナチョコクレープ(${crepeQty}個)の数量以下にしてください。`;
+            warningElem.style.display = "block";
+        }
+        submitBtn.disabled = true; // 警告がある間は送信ボタンを無効化
+    } else {
+        if (warningElem) {
+            warningElem.textContent = "";
+            warningElem.style.display = "none";
+        }
+        submitBtn.disabled = false; // 条件を満たせば送信可能
+    }
 }
 
 // 入力データのリセット
@@ -149,12 +174,27 @@ async function submitOrder() {
 
     // 合計が0円の場合は送信させない
     if (totalAmount === 0) {
-        alert("商品を1つ以上選択してください。");
+        setStatus("商品を1つ以上選択してください。", "error");
         return;
     }
 
+    // ★追加: 送信前のアラート確認表示
+    const crepeQty = orderState["item_b"] || 0;
+    const iceQty = orderState["item_d"] || 0;
+    const potatoQty = orderState["item_a"] || 0;
+
+    const confirmMessage = `以下の内容で注文を送信しますか？\n\n` +
+        `・ポテト: ${potatoQty} 個\n` +
+        `・バナナチョコクレープ: ${crepeQty} 個\n` +
+        `・アイストッピング: ${iceQty} 個\n\n` +
+        `合計金額: ${totalAmount.toLocaleString()} 円`;
+
+    if (!confirm(confirmMessage)) {
+        return; // キャンセルが押された場合は中断
+    }
+
     if (GAS_WEB_APP_URL === "YOUR_GAS_WEB_APP_URL_HERE" || !GAS_WEB_APP_URL) {
-        alert("script.js に Google Apps Script の URL を設定してください。");
+        setStatus("script.js に Google Apps Script の URL を設定してください。", "error");
         return;
     }
 
