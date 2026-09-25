@@ -10,7 +10,7 @@
     <div class="container">
         <h1>R8 文化祭 会計レジ(試作 with AI)</h1>
         <p>
-            確認用：<a href="https://docs.google.com/spreadsheets/d/18BsQaiyHCnNE8SpnwPJP4gDF_SKURpKJZSKtQrdHwqQ/edit?usp=sharing">→ここをクリックして注文を確認(自動更新)←</a>
+            確認用：<a href="https://docs.google.com/spreadsheets/d/18BsQaiyHCnNE8SpnwPJP4gDF_SKURpKJZSKtQrdHwqQ/edit?usp=sharing" target="_blank" rel="noopener">→ここをクリックして注文を確認(自動更新)←</a>
             <br>
             (試作なので編集できない設定にしてますが、本番環境ではレ点チェックが押せます...そのはず)
         </p>
@@ -23,8 +23,15 @@
         <!-- 合計金額および操作エリア -->
         <div class="summary-section">
             <div class="total-display">
-                <span>合計金額:</span>
-                <span id="total-amount">0</span> 円
+                <div>
+                    <span>合計金額:</span>
+                    <span id="total-amount">0</span> 円
+                </div>
+                <!-- ★追加: 金券枚数表示エリア -->
+                <div class="ticket-display" style="font-size: 0.9em; margin-top: 5px; color: #555;">
+                    <span>必要金券 (50円券):</span>
+                    <strong id="ticket-count" style="font-size: 1.2em; color: #d35400;">0</strong> 枚
+                </div>
             </div>
             
             <div class="button-group">
