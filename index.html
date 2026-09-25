@@ -5,6 +5,28 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>文化祭会計システム(試作 with AI)</title>
     <link rel="stylesheet" href="style.css">
+
+    <style>
+        body {
+            display: none;
+        }
+    </style>
+
+    <script>
+        const password = "test"; // ←ここを好きなパスワードに変更
+        const input = prompt("パスワードを入力してください");
+
+        if (input === password) {
+            document.addEventListener("DOMContentLoaded", function () {
+                document.body.style.display = "block";
+            });
+        } else {
+            document.addEventListener("DOMContentLoaded", function () {
+                document.body.innerHTML = "<h1>アクセスできません</h1><p>パスワードが違います。</p>";
+                document.body.style.display = "block";
+            });
+        }
+    </script>
 </head>
 <body>
     <div class="container">
