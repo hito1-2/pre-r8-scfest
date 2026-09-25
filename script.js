@@ -44,16 +44,18 @@ function renderMenu() {
         const itemDiv = document.createElement("div");
         itemDiv.className = "menu-item";
 
-        // メニューカード内に直接 警告メッセージ用div を含める
+        // アイストッピングを含む各メニューブロック内にメッセージエリアを配置
         itemDiv.innerHTML = `
-            <div class="item-info">
-                <span class="item-name">${item.name}</span>
-                <span class="item-price">¥${item.price.toLocaleString()}</span>
-            </div>
-            <div class="quantity-control">
-                <button type="button" class="btn-qty" onclick="changeQuantity('${item.id}', -1)">-</button>
-                <input type="number" id="qty-${item.id}" class="qty-input" value="0" min="0" onchange="updateQuantityDirectly('${item.id}', this.value)">
-                <button type="button" class="btn-qty" onclick="changeQuantity('${item.id}', 1)">+</button>
+            <div class="menu-item-main">
+                <div class="item-info">
+                    <span class="item-name">${item.name}</span>
+                    <span class="item-price">¥${item.price.toLocaleString()}</span>
+                </div>
+                <div class="quantity-control">
+                    <button type="button" class="btn-qty" onclick="changeQuantity('${item.id}', -1)">-</button>
+                    <input type="number" id="qty-${item.id}" class="qty-input" value="0" min="0" onchange="updateQuantityDirectly('${item.id}', this.value)">
+                    <button type="button" class="btn-qty" onclick="changeQuantity('${item.id}', 1)">+</button>
+                </div>
             </div>
             <div id="warning-${item.id}" class="item-warning-msg"></div>
         `;
@@ -106,24 +108,21 @@ function calculateTotal() {
     return total;
 }
 
-// アイストッピングの数量制約チェック
+// アイストッピングの数量制約チェック（画面上の警告制御）
 function checkIceQuantityConstraint() {
     const crepeQty = orderState["item_b"] || 0; // バナナチョコクレープ
     const iceQty = orderState["item_d"] || 0;   // アイストッピング
     
     const warningElem = document.getElementById("warning-item_d");
-    const submitBtn = document.getElementById("submit-btn");
 
-    if (!warningElem || !submitBtn) return;
+    if (!warningElem) return;
 
     if (iceQty > crepeQty) {
         warningElem.textContent = `⚠️ アイストッピングはクレープの個数(${crepeQty}個)以下にしてください。`;
         warningElem.style.display = "block";
-        submitBtn.disabled = true; // 送信ボタン無効化
     } else {
         warningElem.textContent = "";
         warningElem.style.display = "none";
-        submitBtn.disabled = false; // 送信ボタン有効化
     }
 }
 
@@ -161,13 +160,19 @@ async function submitOrder() {
     const totalAmount = calculateTotal();
 
     if (totalAmount === 0) {
-        setStatus("商品を1つ以上選択してください。", "error");
+        alert("商品を1つ以上選択してください。");
         return;
     }
 
     const crepeQty = orderState["item_b"] || 0;
     const iceQty = orderState["item_d"] || 0;
     const potatoQty = orderState["item_a"] || 0;
+
+    // ★送信時チェック：アイストッピングがクレープより多い場合は alert でブロック
+    if (iceQty > crepeQty) {
+        alert(`アイストッピング(${iceQty}個)がバナナチョコクレープ(${crepeQty}個)を超えています。\nアイストッピングはクレープの数量以下にしてください。`);
+        return;
+    }
 
     // 送信直前確認ポップアップ
     const confirmMessage = `以下の内容で注文を送信しますか？\n\n` +
@@ -181,7 +186,7 @@ async function submitOrder() {
     }
 
     if (GAS_WEB_APP_URL === "YOUR_GAS_WEB_APP_URL_HERE" || !GAS_WEB_APP_URL) {
-        setStatus("script.js に Google Apps Script の URL を設定してください。", "error");
+        alert("script.js に Google Apps Script の URL を設定してください。");
         return;
     }
 
