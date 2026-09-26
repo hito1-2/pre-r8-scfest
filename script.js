@@ -174,17 +174,6 @@ async function submitOrder() {
         return;
     }
 
-    // 送信直前確認ポップアップ
-    const confirmMessage = `以下の内容で注文を送信しますか？\n\n` +
-        `・ポテト: ${potatoQty} 個\n` +
-        `・バナナチョコクレープ: ${crepeQty} 個\n` +
-        `・アイストッピング: ${iceQty} 個\n\n` +
-        `合計金額: ${totalAmount.toLocaleString()} 円`;
-
-    if (!confirm(confirmMessage)) {
-        return;
-    }
-
     if (GAS_WEB_APP_URL === "YOUR_GAS_WEB_APP_URL_HERE" || !GAS_WEB_APP_URL) {
         alert("script.js に Google Apps Script の URL を設定してください。");
         return;
