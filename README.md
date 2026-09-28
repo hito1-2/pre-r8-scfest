@@ -7,6 +7,10 @@ https://docs.google.com/spreadsheets/d/18BsQaiyHCnNE8SpnwPJP4gDF_SKURpKJZSKtQrdH
 
 - パスワード(誤アクセス防止のパスワードなので、セキュリティは気にしていない)：test
 
+## 本番環境
+当日利用可能な，本番システムです。
+- https://r8fest.client.jp/
+
 ## 参考
 - https://share.gemini.google/k07RFGllE6uP
 - https://gemini.google.com/share/d/1T925kg3KXx8JeflhwPWn2BjLT0ICqoSM
