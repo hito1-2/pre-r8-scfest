@@ -17,6 +17,16 @@ const menuItems = [
 
 const orderState = {};
 
+// 効果音ファイル設定（JSファイルと同じディレクトリに配置）
+const SOUND_FILES = {
+    success: ["success.mp3", "success.wav"],
+    error: ["error.mp3", "error.wav"],
+    iceOver: ["ice-over.mp3", "ice-over.wav"],
+    empty: ["empty.mp3", "empty.wav"]
+};
+
+const soundPlayers = {};
+
 // ==========================================
 // 2. 初期化処理
 // ==========================================
@@ -26,14 +36,63 @@ document.addEventListener("DOMContentLoaded", () => {
         orderState[item.id] = 0;
     });
 
+    preloadSounds();
     renderMenu();
-    
+    calculateTotal();
+
     document.getElementById("reset-btn").addEventListener("click", resetOrder);
     document.getElementById("submit-btn").addEventListener("click", submitOrder);
 });
 
 // ==========================================
-// 3. UI描画・計算処理
+// 3. 効果音処理
+// ==========================================
+
+function preloadSounds() {
+    Object.keys(SOUND_FILES).forEach(key => {
+        soundPlayers[key] = createAudioWithFallback(SOUND_FILES[key]);
+    });
+}
+
+function createAudioWithFallback(fileList) {
+    const audio = new Audio();
+    audio.preload = "auto";
+
+    if (!Array.isArray(fileList) || fileList.length === 0) {
+        return audio;
+    }
+
+    // 先頭ファイルを基本ソースに設定
+    audio.src = fileList[0];
+
+    // 読み込み失敗時に次候補へ切り替え
+    let currentIndex = 0;
+    audio.addEventListener("error", () => {
+        currentIndex += 1;
+        if (currentIndex < fileList.length) {
+            audio.src = fileList[currentIndex];
+            audio.load();
+        }
+    });
+
+    return audio;
+}
+
+function playSound(type) {
+    const baseAudio = soundPlayers[type];
+    if (!baseAudio) return;
+
+    // 同じ音を連続再生できるよう clone して再生
+    const audio = baseAudio.cloneNode(true);
+    audio.currentTime = 0;
+
+    audio.play().catch(error => {
+        console.warn(`効果音の再生に失敗しました: ${type}`, error);
+    });
+}
+
+// ==========================================
+// 4. UI描画・計算処理
 // ==========================================
 
 function renderMenu() {
@@ -44,7 +103,6 @@ function renderMenu() {
         const itemDiv = document.createElement("div");
         itemDiv.className = "menu-item";
 
-        // アイストッピングを含む各メニューブロック内にメッセージエリアを配置
         itemDiv.innerHTML = `
             <div class="menu-item-main">
                 <div class="item-info">
@@ -66,24 +124,24 @@ function renderMenu() {
 function changeQuantity(itemId, delta) {
     const currentQty = orderState[itemId] || 0;
     const newQty = Math.max(0, currentQty + delta);
-    
+
     orderState[itemId] = newQty;
-    
+
     const inputElem = document.getElementById(`qty-${itemId}`);
     if (inputElem) inputElem.value = newQty;
-    
+
     calculateTotal();
 }
 
 function updateQuantityDirectly(itemId, value) {
     const parsedVal = parseInt(value, 10);
     const newQty = isNaN(parsedVal) || parsedVal < 0 ? 0 : parsedVal;
-    
+
     orderState[itemId] = newQty;
-    
+
     const inputElem = document.getElementById(`qty-${itemId}`);
     if (inputElem) inputElem.value = newQty;
-    
+
     calculateTotal();
 }
 
@@ -98,11 +156,10 @@ function calculateTotal() {
 
     const totalElem = document.getElementById("total-amount");
     if (totalElem) totalElem.textContent = total.toLocaleString();
-    
+
     const ticketElem = document.getElementById("ticket-count");
     if (ticketElem) ticketElem.textContent = ticketCount.toLocaleString();
 
-    // 数量制限チェックを実行
     checkIceQuantityConstraint();
 
     return total;
@@ -110,11 +167,10 @@ function calculateTotal() {
 
 // アイストッピングの数量制約チェック（画面上の警告制御）
 function checkIceQuantityConstraint() {
-    const crepeQty = orderState["item_b"] || 0; // バナナチョコクレープ
-    const iceQty = orderState["item_d"] || 0;   // アイストッピング
-    
-    const warningElem = document.getElementById("warning-item_d");
+    const crepeQty = orderState["item_b"] || 0;
+    const iceQty = orderState["item_d"] || 0;
 
+    const warningElem = document.getElementById("warning-item_d");
     if (!warningElem) return;
 
     if (iceQty > crepeQty) {
@@ -132,7 +188,7 @@ function resetOrder() {
         const inputElem = document.getElementById(`qty-${item.id}`);
         if (inputElem) inputElem.value = 0;
     });
-    
+
     calculateTotal();
     setStatus("", "");
 }
@@ -140,9 +196,9 @@ function resetOrder() {
 function setStatus(message, type) {
     const statusElem = document.getElementById("status-message");
     if (!statusElem) return;
-    
+
     statusElem.textContent = message;
-    
+
     if (type === "success") {
         statusElem.style.color = "#27ae60";
     } else if (type === "error") {
@@ -153,28 +209,29 @@ function setStatus(message, type) {
 }
 
 // ==========================================
-// 4. データ送信処理 (GAS連携)
+// 5. データ送信処理 (GAS連携)
 // ==========================================
 
 async function submitOrder() {
     const totalAmount = calculateTotal();
 
     if (totalAmount === 0) {
+        playSound("empty");
         alert("商品を1つ以上選択してください。");
         return;
     }
 
     const crepeQty = orderState["item_b"] || 0;
     const iceQty = orderState["item_d"] || 0;
-    const potatoQty = orderState["item_a"] || 0;
 
-    // ★送信時チェック：アイストッピングがクレープより多い場合は alert でブロック
     if (iceQty > crepeQty) {
+        playSound("iceOver");
         alert(`アイストッピング(${iceQty}個)がバナナチョコクレープ(${crepeQty}個)を超えています。\nアイストッピングはクレープの数量以下にしてください。`);
         return;
     }
 
     if (GAS_WEB_APP_URL === "YOUR_GAS_WEB_APP_URL_HERE" || !GAS_WEB_APP_URL) {
+        playSound("error");
         alert("script.js に Google Apps Script の URL を設定してください。");
         return;
     }
@@ -204,6 +261,7 @@ async function submitOrder() {
         const result = await response.json();
 
         if (result.status === "success") {
+            playSound("success");
             setStatus("送信が完了しました！", "success");
             setTimeout(() => {
                 resetOrder();
@@ -214,6 +272,7 @@ async function submitOrder() {
 
     } catch (error) {
         console.error("Error:", error);
+        playSound("error");
         setStatus("エラーが発生しました。もう一度お試しください。", "error");
     } finally {
         submitBtn.disabled = false;
