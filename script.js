@@ -11,7 +11,7 @@ const TICKET_UNIT_PRICE = 50;
 
 const menuItems = [
     { id: "item_a", name: "ポテト", price: 150 },
-    { id: "item_b", name: "バナナチョコクレープ", price: 200 },
+    { id: "item_b", name: "バナナチョコクレープ", price: 250 },
     { id: "item_d", name: "アイストッピング", price: 50 }
 ];
 
