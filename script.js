@@ -27,6 +27,9 @@ const SOUND_FILES = {
 
 const soundPlayers = {};
 
+// 送信エラー時の固定メッセージ
+const SUBMIT_ERROR_MESSAGE = "【エラー】送信できませんでした。もう一度お試しください。<br>ただし、送信されていてもこのエラーが表示されることがあることにご留意ください。";
+
 // ==========================================
 // 2. 初期化処理
 // ==========================================
@@ -197,7 +200,8 @@ function setStatus(message, type) {
     const statusElem = document.getElementById("status-message");
     if (!statusElem) return;
 
-    statusElem.textContent = message;
+    // 下部メッセージはHTML改行に対応させる
+    statusElem.innerHTML = message;
 
     if (type === "success") {
         statusElem.style.color = "#27ae60";
@@ -206,6 +210,13 @@ function setStatus(message, type) {
     } else {
         statusElem.style.color = "#333";
     }
+}
+
+// 送信エラー時に下部表示と簡易ホップアップの両方で通知
+function notifySubmitError() {
+    playSound("error");
+    setStatus(SUBMIT_ERROR_MESSAGE, "error");
+    alert("【エラー】送信できませんでした。もう一度お試しください。\nただし、送信されていてもこのエラーが表示されることがあることにご留意ください。");
 }
 
 // ==========================================
@@ -238,7 +249,7 @@ async function submitOrder() {
 
     const submitBtn = document.getElementById("submit-btn");
     submitBtn.disabled = true;
-    setStatus("送信中...", "info");
+    setStatus("送信中...", "");
 
     const payload = {
         totalAmount: totalAmount,
@@ -258,6 +269,10 @@ async function submitOrder() {
             body: JSON.stringify(payload)
         });
 
+        if (!response.ok) {
+            throw new Error(`HTTP ${response.status}`);
+        }
+
         const result = await response.json();
 
         if (result.status === "success") {
@@ -272,8 +287,7 @@ async function submitOrder() {
 
     } catch (error) {
         console.error("Error:", error);
-        playSound("error");
-        setStatus("エラーが発生しました。もう一度お試しください。", "error");
+        notifySubmitError();
     } finally {
         submitBtn.disabled = false;
     }
