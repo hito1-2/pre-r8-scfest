@@ -28,7 +28,7 @@ const SOUND_FILES = {
 const soundPlayers = {};
 
 // 送信エラー時の固定メッセージ
-const SUBMIT_ERROR_MESSAGE = "【エラー】送信できませんでした。もう一度お試しください。<br>ただし、送信されていてもこのエラーが表示されることがあります。";
+const SUBMIT_ERROR_MESSAGE = "【エラー】送信できませんでした。もう一度お試しください。\nただし、送信されていてもこのエラーが表示されることがあります。";
 
 // ==========================================
 // 2. 初期化処理
@@ -70,8 +70,10 @@ function createAudioWithFallback(fileList) {
 
     // 読み込み失敗時に次候補へ切り替え
     let currentIndex = 0;
+
     audio.addEventListener("error", () => {
         currentIndex += 1;
+
         if (currentIndex < fileList.length) {
             audio.src = fileList[currentIndex];
             audio.load();
@@ -83,10 +85,12 @@ function createAudioWithFallback(fileList) {
 
 function playSound(type) {
     const baseAudio = soundPlayers[type];
+
     if (!baseAudio) return;
 
     // 同じ音を連続再生できるよう clone して再生
     const audio = baseAudio.cloneNode(true);
+
     audio.currentTime = 0;
 
     audio.play().catch(error => {
@@ -95,11 +99,76 @@ function playSound(type) {
 }
 
 // ==========================================
-// 4. UI描画・計算処理
+// 4. ポップアップ処理
+// ==========================================
+
+function showPopup(message) {
+    // すでにポップアップが表示されている場合は削除
+    const existingPopup = document.querySelector(".custom-popup-overlay");
+
+    if (existingPopup) {
+        existingPopup.remove();
+    }
+
+    const overlay = document.createElement("div");
+    overlay.className = "custom-popup-overlay";
+
+    const popup = document.createElement("div");
+    popup.className = "custom-popup";
+
+    const messageElement = document.createElement("div");
+    messageElement.className = "custom-popup-message";
+
+    // 改行をそのまま表示
+    messageElement.textContent = message;
+
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "custom-popup-button";
+    button.textContent = "OK";
+
+    popup.appendChild(messageElement);
+    popup.appendChild(button);
+
+    overlay.appendChild(popup);
+    document.body.appendChild(overlay);
+
+    // OKボタン
+    button.addEventListener("click", () => {
+        closePopup();
+    });
+
+    // 背景部分をクリックしても閉じない仕様
+    // 誤操作によるポップアップ消失を防止
+
+    // キーボードのEnter / Escapeでも閉じられるようにする
+    const keydownHandler = event => {
+        if (event.key === "Enter" || event.key === "Escape") {
+            closePopup();
+        }
+    };
+
+    document.addEventListener("keydown", keydownHandler);
+
+    // ポップアップを閉じる処理
+    function closePopup() {
+        overlay.remove();
+        document.removeEventListener("keydown", keydownHandler);
+    }
+
+    // ボタンへフォーカス
+    requestAnimationFrame(() => {
+        button.focus();
+    });
+}
+
+// ==========================================
+// 5. UI描画・計算処理
 // ==========================================
 
 function renderMenu() {
     const container = document.getElementById("menu-container");
+
     container.innerHTML = "";
 
     menuItems.forEach(item => {
@@ -112,14 +181,34 @@ function renderMenu() {
                     <span class="item-name">${item.name}</span>
                     <span class="item-price">¥${item.price.toLocaleString()}</span>
                 </div>
+
                 <div class="quantity-control">
-                    <button type="button" class="btn-qty" onclick="changeQuantity('${item.id}', -1)">-</button>
-                    <input type="number" id="qty-${item.id}" class="qty-input" value="0" min="0" onchange="updateQuantityDirectly('${item.id}', this.value)">
-                    <button type="button" class="btn-qty" onclick="changeQuantity('${item.id}', 1)">+</button>
+                    <button
+                        type="button"
+                        class="btn-qty"
+                        onclick="changeQuantity('${item.id}', -1)"
+                    >-</button>
+
+                    <input
+                        type="number"
+                        id="qty-${item.id}"
+                        class="qty-input"
+                        value="0"
+                        min="0"
+                        onchange="updateQuantityDirectly('${item.id}', this.value)"
+                    >
+
+                    <button
+                        type="button"
+                        class="btn-qty"
+                        onclick="changeQuantity('${item.id}', 1)"
+                    >+</button>
                 </div>
             </div>
+
             <div id="warning-${item.id}" class="item-warning-msg"></div>
         `;
+
         container.appendChild(itemDiv);
     });
 }
@@ -131,37 +220,55 @@ function changeQuantity(itemId, delta) {
     orderState[itemId] = newQty;
 
     const inputElem = document.getElementById(`qty-${itemId}`);
-    if (inputElem) inputElem.value = newQty;
+
+    if (inputElem) {
+        inputElem.value = newQty;
+    }
 
     calculateTotal();
 }
 
 function updateQuantityDirectly(itemId, value) {
     const parsedVal = parseInt(value, 10);
-    const newQty = isNaN(parsedVal) || parsedVal < 0 ? 0 : parsedVal;
+
+    const newQty =
+        isNaN(parsedVal) || parsedVal < 0
+            ? 0
+            : parsedVal;
 
     orderState[itemId] = newQty;
 
     const inputElem = document.getElementById(`qty-${itemId}`);
-    if (inputElem) inputElem.value = newQty;
+
+    if (inputElem) {
+        inputElem.value = newQty;
+    }
 
     calculateTotal();
 }
 
 function calculateTotal() {
     let total = 0;
+
     menuItems.forEach(item => {
         const qty = orderState[item.id] || 0;
+
         total += item.price * qty;
     });
 
     const ticketCount = Math.ceil(total / TICKET_UNIT_PRICE);
 
     const totalElem = document.getElementById("total-amount");
-    if (totalElem) totalElem.textContent = total.toLocaleString();
+
+    if (totalElem) {
+        totalElem.textContent = total.toLocaleString();
+    }
 
     const ticketElem = document.getElementById("ticket-count");
-    if (ticketElem) ticketElem.textContent = ticketCount.toLocaleString();
+
+    if (ticketElem) {
+        ticketElem.textContent = ticketCount.toLocaleString();
+    }
 
     checkIceQuantityConstraint();
 
@@ -174,10 +281,13 @@ function checkIceQuantityConstraint() {
     const iceQty = orderState["item_d"] || 0;
 
     const warningElem = document.getElementById("warning-item_d");
+
     if (!warningElem) return;
 
     if (iceQty > crepeQty) {
-        warningElem.textContent = `⚠️ アイストッピングはクレープの個数(${crepeQty}個)以下にしてください。`;
+        warningElem.textContent =
+            `⚠️ アイストッピングはクレープの個数(${crepeQty}個)以下にしてください。`;
+
         warningElem.style.display = "block";
     } else {
         warningElem.textContent = "";
@@ -188,8 +298,13 @@ function checkIceQuantityConstraint() {
 function resetOrder() {
     menuItems.forEach(item => {
         orderState[item.id] = 0;
-        const inputElem = document.getElementById(`qty-${item.id}`);
-        if (inputElem) inputElem.value = 0;
+
+        const inputElem =
+            document.getElementById(`qty-${item.id}`);
+
+        if (inputElem) {
+            inputElem.value = 0;
+        }
     });
 
     calculateTotal();
@@ -197,10 +312,12 @@ function resetOrder() {
 }
 
 function setStatus(message, type) {
-    const statusElem = document.getElementById("status-message");
+    const statusElem =
+        document.getElementById("status-message");
+
     if (!statusElem) return;
 
-    // 下部メッセージはHTML改行に対応させる
+    // 下部メッセージはHTML改行に対応
     statusElem.innerHTML = message;
 
     if (type === "success") {
@@ -212,47 +329,71 @@ function setStatus(message, type) {
     }
 }
 
-// 送信エラー時に下部表示と簡易ホップアップの両方で通知
+// 送信エラー時に下部表示とポップアップの両方で通知
 function notifySubmitError() {
     playSound("error");
+
     setStatus(SUBMIT_ERROR_MESSAGE, "error");
-    alert("【エラー】送信できませんでした。もう一度お試しください。\nただし、送信されていてもこのエラーが表示されることがあることがあります。");
+
+    showPopup(SUBMIT_ERROR_MESSAGE);
 }
 
 // ==========================================
-// 5. データ送信処理 (GAS連携)
+// 6. データ送信処理 (GAS連携)
 // ==========================================
 
 async function submitOrder() {
     const totalAmount = calculateTotal();
 
+    // 商品未選択
     if (totalAmount === 0) {
         playSound("empty");
-        alert("商品を1つ以上選択してください。");
+
+        showPopup(
+            "商品を1つ以上選択してください。"
+        );
+
         return;
     }
 
     const crepeQty = orderState["item_b"] || 0;
     const iceQty = orderState["item_d"] || 0;
 
+    // アイスがクレープ数を超えている
     if (iceQty > crepeQty) {
         playSound("iceOver");
-        alert(`アイストッピング(${iceQty}個)がバナナチョコクレープ(${crepeQty}個)を超えています。\nアイストッピングはクレープの数量以下にしてください。`);
+
+        showPopup(
+            `アイストッピング(${iceQty}個)がバナナチョコクレープ(${crepeQty}個)を超えています。\nアイストッピングはクレープの数量以下にしてください。`
+        );
+
         return;
     }
 
-    if (GAS_WEB_APP_URL === "YOUR_GAS_WEB_APP_URL_HERE" || !GAS_WEB_APP_URL) {
+    // GAS URL未設定
+    if (
+        GAS_WEB_APP_URL === "YOUR_GAS_WEB_APP_URL_HERE" ||
+        !GAS_WEB_APP_URL
+    ) {
         playSound("error");
-        alert("script.js に Google Apps Script の URL を設定してください。");
+
+        showPopup(
+            "script.js に Google Apps Script の URLを設定してください。"
+        );
+
         return;
     }
 
-    const submitBtn = document.getElementById("submit-btn");
+    const submitBtn =
+        document.getElementById("submit-btn");
+
     submitBtn.disabled = true;
+
     setStatus("送信中...", "");
 
     const payload = {
         totalAmount: totalAmount,
+
         items: menuItems.map(item => ({
             id: item.id,
             name: item.name,
@@ -263,9 +404,11 @@ async function submitOrder() {
     try {
         const response = await fetch(GAS_WEB_APP_URL, {
             method: "POST",
+
             headers: {
                 "Content-Type": "text/plain;charset=utf-8"
             },
+
             body: JSON.stringify(payload)
         });
 
@@ -277,17 +420,28 @@ async function submitOrder() {
 
         if (result.status === "success") {
             playSound("success");
-            setStatus("送信が完了しました！", "success");
+
+            setStatus(
+                "送信が完了しました！",
+                "success"
+            );
+
             setTimeout(() => {
                 resetOrder();
             }, 1000);
+
         } else {
-            throw new Error(result.message || "送信エラーが発生しました。");
+            throw new Error(
+                result.message ||
+                "送信エラーが発生しました。"
+            );
         }
 
     } catch (error) {
         console.error("Error:", error);
+
         notifySubmitError();
+
     } finally {
         submitBtn.disabled = false;
     }

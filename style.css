@@ -143,14 +143,17 @@ h1 {
 /* メニューカード内の警告スタイル */
 .menu-item {
     display: flex;
-    flex-direction: column; /* 警告をカード内下部に配置できるように縦並び対応 */
+    flex-direction: column;
+    /* 警告をカード内下部に配置できるように縦並び対応 */
 }
+
 .menu-item-main {
     display: flex;
     justify-content: space-between;
     align-items: center;
     width: 100%;
 }
+
 .item-warning-msg {
     color: #d9534f;
     background-color: #fdf2f2;
@@ -161,4 +164,109 @@ h1 {
     font-size: 0.85em;
     font-weight: bold;
     display: none;
+}
+
+
+/* ==========================================
+   カスタムポップアップ
+   ========================================== */
+
+/* 背景 */
+.custom-popup-overlay {
+    position: fixed;
+    inset: 0;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    background-color: rgba(0, 0, 0, 0.45);
+
+    z-index: 9999;
+
+    padding: 20px;
+    box-sizing: border-box;
+}
+
+/* ポップアップ本体 */
+.custom-popup {
+    width: min(90%, 420px);
+
+    background-color: #ffffff;
+
+    border-radius: 12px;
+
+    padding: 24px;
+
+    box-sizing: border-box;
+
+    box-shadow:
+        0 10px 40px rgba(0, 0, 0, 0.3);
+
+    text-align: center;
+
+    animation: custom-popup-show 0.15s ease-out;
+}
+
+/* メッセージ */
+.custom-popup-message {
+    margin-bottom: 20px;
+
+    color: #333;
+
+    font-size: 1rem;
+    line-height: 1.6;
+
+    white-space: pre-line;
+
+    overflow-wrap: anywhere;
+}
+
+/* OKボタン */
+.custom-popup-button {
+    min-width: 100px;
+
+    padding: 10px 20px;
+
+    border: none;
+    border-radius: 8px;
+
+    background-color: #3498db;
+    color: #ffffff;
+
+    font-size: 16px;
+    font-weight: bold;
+
+    cursor: pointer;
+
+    transition:
+        background-color 0.2s,
+        opacity 0.2s;
+}
+
+.custom-popup-button:hover {
+    opacity: 0.9;
+}
+
+.custom-popup-button:active {
+    opacity: 0.8;
+}
+
+.custom-popup-button:focus {
+    outline: 3px solid rgba(52, 152, 219, 0.3);
+    outline-offset: 2px;
+}
+
+
+/* ポップアップ表示アニメーション */
+@keyframes custom-popup-show {
+    from {
+        opacity: 0;
+        transform: scale(0.95);
+    }
+
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
 }
