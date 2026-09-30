@@ -1,621 +1,272 @@
-/* ========================================
-全体
-======================================== */
-
+/* 全体スタイル */
 body {
-font-family:
-"Helvetica Neue",
-Arial,
-"Hiragino Kaku Gothic ProN",
-"Hiragino Sans",
-Meiryo,
-sans-serif;
-
-
-background-color: #f5f7fa;
-
-margin: 0;
-padding: 20px;
-
-color: #333;
-
-
+    font-family: "Helvetica Neue", Arial, "Hiragino Kaku Gothic ProN", "Hiragino Sans", Meiryo, sans-serif;
+    background-color: #f5f7fa;
+    margin: 0;
+    padding: 20px;
+    color: #333;
+    display: none;
 }
-
-/* ========================================
-会計システム本体
-======================================== */
 
 .container {
-display: none;
-
-
-max-width: 600px;
-
-margin: 0 auto;
-
-background: #ffffff;
-
-padding: 24px;
-
-border-radius: 12px;
-
-box-shadow:
-    0 4px 12px rgba(0, 0, 0, 0.1);
-
-
+    max-width: 600px;
+    margin: 0 auto;
+    background: #ffffff;
+    padding: 24px;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
-/* ========================================
-見出し
-======================================== */
-
-.container h1 {
-margin-top: 0;
-
-
-font-size: 1.7rem;
-
-line-height: 1.4;
-
-
+h1 {
+    text-align: center;
+    margin-bottom: 24px;
+    font-size: 1.8rem;
+    color: #2c3e50;
 }
 
-/* ========================================
-メニュー一覧
-======================================== */
-
+/* メニュー項目カード */
 .menu-list {
-margin-top: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    margin-bottom: 24px;
 }
 
 .menu-item {
-background: #f8f9fa;
-
-
-border: 1px solid #e1e5e8;
-
-border-radius: 10px;
-
-padding: 15px;
-
-margin-bottom: 12px;
-
-
-}
-
-.menu-item-main {
-display: flex;
-
-
-align-items: center;
-
-justify-content: space-between;
-
-gap: 15px;
-
-
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    background-color: #fafafa;
 }
 
 .item-info {
-display: flex;
-
-
-flex-direction: column;
-
-gap: 5px;
-
-
-}
-
-.item-name {
-font-weight: bold;
-
-
-font-size: 1.05rem;
-
-
-}
-
-.item-price {
-color: #666;
-
-
-font-size: 0.95rem;
-
-
-}
-
-/* ========================================
-数量操作
-======================================== */
-
-.quantity-control {
-display: flex;
-
-
-align-items: center;
-
-gap: 6px;
-
-
-}
-
-.btn-qty {
-width: 38px;
-height: 38px;
-
-
-border: none;
-
-border-radius: 7px;
-
-background-color: #3498db;
-
-color: white;
-
-font-size: 1.2rem;
-
-font-weight: bold;
-
-cursor: pointer;
-
-
-}
-
-.btn-qty:hover {
-background-color: #2980b9;
-}
-
-.qty-input {
-width: 55px;
-
-
-height: 36px;
-
-box-sizing: border-box;
-
-text-align: center;
-
-font-size: 1rem;
-
-border: 1px solid #ccc;
-
-border-radius: 7px;
-
-
-}
-
-/* ========================================
-注意事項
-======================================== */
-
-.item-warning-msg {
-display: none;
-
-
-margin-top: 10px;
-
-padding: 8px 10px;
-
-border-radius: 6px;
-
-background-color: #fff3cd;
-
-color: #856404;
-
-font-size: 0.9rem;
-
-
-}
-
-/* ========================================
-合計
-======================================== */
-
-.summary-section {
-margin-top: 25px;
-
-
-padding-top: 20px;
-
-border-top: 1px solid #ddd;
-
-
-}
-
-.total-display {
-font-size: 1.2rem;
-
-
-font-weight: bold;
-
-
-}
-
-.ticket-display {
-font-weight: normal;
-}
-
-/* ========================================
-ボタン
-======================================== */
-
-.button-group {
-display: flex;
-
-
-gap: 10px;
-
-margin-top: 20px;
-
-
-}
-
-.btn {
-flex: 1;
-
-
-padding: 12px 15px;
-
-border: none;
-
-border-radius: 8px;
-
-font-size: 1rem;
-
-font-weight: bold;
-
-cursor: pointer;
-
-
-}
-
-.btn:disabled {
-opacity: 0.6;
-
-
-cursor: not-allowed;
-
-
-}
-
-.btn-primary {
-background-color: #3498db;
-
-
-color: #fff;
-
-
-}
-
-.btn-primary:hover:not(:disabled) {
-background-color: #2980b9;
-}
-
-.btn-secondary {
-background-color: #95a5a6;
-
-
-color: #fff;
-
-
-}
-
-.btn-secondary:hover:not(:disabled) {
-background-color: #7f8c8d;
-}
-
-/* ========================================
-ステータスメッセージ
-======================================== */
-
-.status-message {
-margin-top: 15px;
-
-
-white-space: pre-line;
-
-line-height: 1.6;
-
-
-}
-
-/* ========================================
-パスワード認証画面
-======================================== */
-
-.password-overlay {
-position: fixed;
-
-
-inset: 0;
-
-display: flex;
-
-align-items: center;
-
-justify-content: center;
-
-background:
-    rgba(0, 0, 0, 0.45);
-
-z-index: 9999;
-
-padding: 20px;
-
-box-sizing: border-box;
-
-
-}
-
-.password-popup {
-width: 100%;
-
-
-max-width: 420px;
-
-background: #ffffff;
-
-padding: 30px;
-
-border-radius: 14px;
-
-box-shadow:
-    0 10px 30px rgba(0, 0, 0, 0.25);
-
-box-sizing: border-box;
-
-text-align: center;
-
-
-}
-
-.password-popup-title {
-margin: 0 0 15px;
-
-
-font-size: 1.6rem;
-
-
-}
-
-.password-popup-description {
-margin-bottom: 20px;
-
-
-line-height: 1.7;
-
-
-}
-
-.password-popup-input {
-width: 100%;
-
-
-box-sizing: border-box;
-
-padding: 12px 14px;
-
-font-size: 1.1rem;
-
-border: 1px solid #ccc;
-
-border-radius: 8px;
-
-outline: none;
-
-
-}
-
-.password-popup-input:focus {
-border-color: #3498db;
-
-
-box-shadow:
-    0 0 0 3px
-    rgba(52, 152, 219, 0.15);
-
-
-}
-
-.password-popup-button {
-width: 100%;
-
-
-margin-top: 15px;
-
-padding: 12px;
-
-border: none;
-
-border-radius: 8px;
-
-background: #3498db;
-
-color: white;
-
-font-size: 1rem;
-
-font-weight: bold;
-
-cursor: pointer;
-
-
-}
-
-.password-popup-button:hover {
-background: #2980b9;
-}
-
-/* ========================================
-通常のポップアップ
-======================================== */
-
-.custom-popup-overlay {
-position: fixed;
-
-
-inset: 0;
-
-display: flex;
-
-align-items: center;
-
-justify-content: center;
-
-background-color:
-    rgba(0, 0, 0, 0.45);
-
-z-index: 9999;
-
-padding: 20px;
-
-box-sizing: border-box;
-
-
-}
-
-.custom-popup {
-width: 100%;
-
-
-max-width: 500px;
-
-background: #fff;
-
-padding: 25px;
-
-border-radius: 12px;
-
-box-shadow:
-    0 10px 30px
-    rgba(0, 0, 0, 0.25);
-
-text-align: center;
-
-
-}
-
-.custom-popup-message {
-margin-bottom: 20px;
-
-
-font-size: 1rem;
-
-line-height: 1.7;
-
-white-space: pre-line;
-
-
-}
-
-.custom-popup-button {
-padding: 10px 30px;
-
-
-border: none;
-
-border-radius: 8px;
-
-background: #3498db;
-
-color: #fff;
-
-font-size: 1rem;
-
-font-weight: bold;
-
-cursor: pointer;
-
-
-}
-
-.custom-popup-button:hover {
-background: #2980b9;
-}
-
-/* ========================================
-401 Unauthorized
-======================================== */
-
-.unauthorized-page {
-display: block;
-
-
-margin: 0;
-
-padding: 30px;
-
-background: #fff;
-
-color: #000;
-
-
-}
-
-.unauthorized-page h1 {
-margin-top: 0;
-}
-
-.unauthorized-page p {
-font-size: 64px;
-
-
-text-align: center;
-
-
-}
-
-/* ========================================
-スマートフォン
-======================================== */
-
-@media (max-width: 480px) {
-
-
-body {
-    padding: 10px;
-}
-
-
-.container {
-    padding: 18px;
-}
-
-
-.container h1 {
-    font-size: 1.4rem;
-}
-
-
-.menu-item-main {
-    align-items: flex-start;
-
+    display: flex;
     flex-direction: column;
 }
 
+.item-name {
+    font-weight: bold;
+    font-size: 1.1rem;
+}
 
+.item-price {
+    color: #666;
+    font-size: 0.95rem;
+}
+
+/* 数量変更コントローラー */
 .quantity-control {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.btn-qty {
+    width: 36px;
+    height: 36px;
+    font-size: 1.2rem;
+    font-weight: bold;
+    border: 1px solid #ccc;
+    background-color: #fff;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.btn-qty:active {
+    background-color: #e0e0e0;
+}
+
+.qty-input {
+    width: 50px;
+    height: 36px;
+    text-align: center;
+    font-size: 1.1rem;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+}
+
+/* 集計・送信セクション */
+.summary-section {
+    border-top: 2px solid #eee;
+    padding-top: 20px;
+    text-align: center;
+}
+
+.total-display {
+    font-size: 1.6rem;
+    font-weight: bold;
+    margin-bottom: 20px;
+    color: #e74c3c;
+}
+
+.button-group {
+    display: flex;
+    gap: 12px;
+}
+
+.btn {
+    flex: 1;
+    padding: 14px;
+    font-size: 1.1rem;
+    font-weight: bold;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: opacity 0.2s;
+}
+
+.btn:hover {
+    opacity: 0.9;
+}
+
+.btn-primary {
+    background-color: #27ae60;
+    color: #fff;
+}
+
+.btn-secondary {
+    background-color: #95a5a6;
+    color: #fff;
+}
+
+.status-message {
+    margin-top: 16px;
+    font-weight: bold;
+    min-height: 24px;
+}
+
+/* アイストッピングの不整合警告 */
+/* メニューカード内の警告スタイル */
+.menu-item {
+    display: flex;
+    flex-direction: column;
+    /* 警告をカード内下部に配置できるように縦並び対応 */
+}
+
+.menu-item-main {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
     width: 100%;
+}
 
-    justify-content: flex-end;
+.item-warning-msg {
+    color: #d9534f;
+    background-color: #fdf2f2;
+    border: 1px solid #f5c6cb;
+    padding: 6px 10px;
+    margin-top: 8px;
+    border-radius: 4px;
+    font-size: 0.85em;
+    font-weight: bold;
+    display: none;
 }
 
 
-.password-popup {
-    padding: 22px;
+/* ==========================================
+   カスタムポップアップ
+   ========================================== */
+
+/* 背景 */
+.custom-popup-overlay {
+    position: fixed;
+    inset: 0;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    background-color: rgba(0, 0, 0, 0.45);
+
+    z-index: 9999;
+
+    padding: 20px;
+    box-sizing: border-box;
+}
+
+/* ポップアップ本体 */
+.custom-popup {
+    width: min(90%, 420px);
+
+    background-color: #ffffff;
+
+    border-radius: 12px;
+
+    padding: 24px;
+
+    box-sizing: border-box;
+
+    box-shadow:
+        0 10px 40px rgba(0, 0, 0, 0.3);
+
+    text-align: center;
+
+    animation: custom-popup-show 0.15s ease-out;
+}
+
+/* メッセージ */
+.custom-popup-message {
+    margin-bottom: 20px;
+
+    color: #333;
+
+    font-size: 1rem;
+    line-height: 1.6;
+
+    white-space: pre-line;
+
+    overflow-wrap: anywhere;
+}
+
+/* OKボタン */
+.custom-popup-button {
+    min-width: 100px;
+
+    padding: 10px 20px;
+
+    border: none;
+    border-radius: 8px;
+
+    background-color: #3498db;
+    color: #ffffff;
+
+    font-size: 16px;
+    font-weight: bold;
+
+    cursor: pointer;
+
+    transition:
+        background-color 0.2s,
+        opacity 0.2s;
+}
+
+.custom-popup-button:hover {
+    opacity: 0.9;
+}
+
+.custom-popup-button:active {
+    opacity: 0.8;
+}
+
+.custom-popup-button:focus {
+    outline: 3px solid rgba(52, 152, 219, 0.3);
+    outline-offset: 2px;
 }
 
 
-.password-popup-title {
-    font-size: 1.3rem;
-}
+/* ポップアップ表示アニメーション */
+@keyframes custom-popup-show {
+    from {
+        opacity: 0;
+        transform: scale(0.95);
+    }
 
-
-.unauthorized-page p {
-    font-size: 36px;
-}
-
-
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
 }
