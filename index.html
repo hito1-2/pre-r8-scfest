@@ -3,67 +3,244 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
     <title>文化祭会計システム(試作 with AI)</title>
+
     <link rel="stylesheet" href="style.css">
-
-    <style>
-
-    </style>
-
-    <script>
-        const password = "test"; // ←ここを好きなパスワードに変更
-        const input = prompt("パスワードを入力してください");
-
-        if (input === password) {
-            document.addEventListener("DOMContentLoaded", function () {
-                document.body.style.display = "block";
-            });
-        } else {
-            document.addEventListener("DOMContentLoaded", function () {
-                document.body.innerHTML = "<h1>401 Unauthorized</h1><p style='font-size: 64px; text-align: center;'>パスワードが違います</p>";
-                document.body.style.display = "block";
-            });
-        }
-    </script>
 </head>
+
 <body>
+
+    <!-- ==========================================
+         パスワード入力ポップアップ
+         ========================================== -->
+
+    <div id="password-overlay" class="custom-popup-overlay">
+        <div class="password-popup">
+
+            <h2 class="password-popup-title">
+                パスワード認証
+            </h2>
+
+            <p class="password-popup-description">
+                会計システムを利用するには<br>
+                パスワードを入力してください。
+            </p>
+
+            <input
+                type="password"
+                id="password-input"
+                class="password-popup-input"
+                autocomplete="off"
+                placeholder="パスワード"
+            >
+
+            <button
+                type="button"
+                id="password-submit"
+                class="password-popup-button"
+            >
+                認証
+            </button>
+
+            <div
+                id="password-error"
+                class="password-popup-error"
+            ></div>
+
+        </div>
+    </div>
+
+
+    <!-- ==========================================
+         会計システム本体
+         ========================================== -->
+
     <div class="container">
+
         <h1>R8 文化祭 会計レジ(試作 with AI)</h1>
+
         <p>
-            確認用：<a href="https://docs.google.com/spreadsheets/d/18BsQaiyHCnNE8SpnwPJP4gDF_SKURpKJZSKtQrdHwqQ/edit?usp=sharing" target="_blank" rel="noopener">→ここをクリックして注文を確認(自動更新)←</a>
+            確認用：
+            <a
+                href="https://docs.google.com/spreadsheets/d/18BsQaiyHCnNE8SpnwPJP4gDF_SKURpKJZSKtQrdHwqQ/edit?usp=sharing"
+                target="_blank"
+                rel="noopener"
+            >
+                →ここをクリックして注文を確認(自動更新)←
+            </a>
+
             <br>
+
             (試作なので編集できない設定にしてますが、本番環境ではレ点チェックが押せます...そのはず)
         </p>
-        
-        <!-- メニュー一覧表示エリア -->
+
+
+        <!-- ==========================================
+             メニュー一覧表示エリア
+             ========================================== -->
+
         <div id="menu-container" class="menu-list">
             <!-- JavaScriptによりメニューカードが自動生成されます -->
         </div>
 
-        <!-- 合計金額および操作エリア -->
+
+        <!-- ==========================================
+             合計金額および操作エリア
+             ========================================== -->
+
         <div class="summary-section">
+
             <div class="total-display">
+
                 <div>
                     <span>合計金額:</span>
-                    <span id="total-amount">0</span> 円
+                    <span id="total-amount">0</span>
+                    円
                 </div>
-                <!-- ★追加: 金券枚数表示エリア -->
-                <div class="ticket-display" style="font-size: 0.9em; margin-top: 5px; color: #555;">
+
+                <!-- 金券枚数表示エリア -->
+                <div
+                    class="ticket-display"
+                    style="font-size: 0.9em; margin-top: 5px; color: #555;"
+                >
                     <span>必要金券 (50円券):</span>
-                    <strong id="ticket-count" style="font-size: 1.2em; color: #d35400;">0</strong> 枚
+
+                    <strong
+                        id="ticket-count"
+                        style="font-size: 1.2em; color: #d35400;"
+                    >
+                        0
+                    </strong>
+
+                    枚
                 </div>
+
             </div>
-            
+
+
+            <!-- ==========================================
+                 操作ボタン
+                 ========================================== -->
+
             <div class="button-group">
-                <button id="reset-btn" type="button" class="btn btn-secondary">リセット</button>
-                <button id="submit-btn" type="button" class="btn btn-primary">注文送信</button>
+
+                <button
+                    id="reset-btn"
+                    type="button"
+                    class="btn btn-secondary"
+                >
+                    リセット
+                </button>
+
+                <button
+                    id="submit-btn"
+                    type="button"
+                    class="btn btn-primary"
+                >
+                    注文送信
+                </button>
+
             </div>
-            
-            <!-- 送信ステータス表示 -->
-            <p id="status-message" class="status-message"></p>
+
+
+            <!-- ==========================================
+                 送信ステータス表示
+                 ========================================== -->
+
+            <p
+                id="status-message"
+                class="status-message"
+            ></p>
+
         </div>
+
     </div>
 
+
+    <!-- ==========================================
+         パスワード認証処理
+         ========================================== -->
+
+    <script>
+        const password = "test";
+
+        const passwordOverlay =
+            document.getElementById("password-overlay");
+
+        const passwordInput =
+            document.getElementById("password-input");
+
+        const passwordSubmit =
+            document.getElementById("password-submit");
+
+        const passwordError =
+            document.getElementById("password-error");
+
+
+        function authenticate() {
+            const input = passwordInput.value;
+
+            if (input === password) {
+
+                // ==========================================
+                // 認証成功
+                // ==========================================
+
+                passwordOverlay.remove();
+
+                document.body.style.display = "block";
+
+                return;
+            }
+
+
+            // ==========================================
+            // 認証失敗
+            // ==========================================
+
+            passwordOverlay.remove();
+
+            document.body.innerHTML =
+                "<h1>401 Unauthorized</h1>" +
+                "<p style='font-size: 64px; text-align: center;'>" +
+                "パスワードが違います" +
+                "</p>";
+
+            document.body.style.display = "block";
+        }
+
+
+        // 「認証」ボタン
+        passwordSubmit.addEventListener(
+            "click",
+            authenticate
+        );
+
+
+        // Enterキーでも認証
+        passwordInput.addEventListener(
+            "keydown",
+            event => {
+                if (event.key === "Enter") {
+                    authenticate();
+                }
+            }
+        );
+
+
+        // ページ読み込み時にパスワード欄へフォーカス
+        requestAnimationFrame(() => {
+            passwordInput.focus();
+        });
+    </script>
+
+
+    <!-- ==========================================
+         会計システム JavaScript
+         ========================================== -->
+
     <script src="script.js"></script>
+
 </body>
 </html>
