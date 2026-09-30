@@ -16,3 +16,4 @@ https://docs.google.com/spreadsheets/d/18BsQaiyHCnNE8SpnwPJP4gDF_SKURpKJZSKtQrdH
 - https://gemini.google.com/share/d/1T925kg3KXx8JeflhwPWn2BjLT0ICqoSM
 - https://ai.rakuten.co.jp/share/6ab67f91aa01ac2ac981ca49?utm_source=copylink
 - https://share.gemini.google/5WnubQpsRAYi
+- https://chatgpt.com/share/6abd086f-9734-83e8-a76b-c0529e0c2853
