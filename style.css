@@ -5,7 +5,7 @@ body {
     margin: 0;
     padding: 20px;
     color: #333;
-    display: none;
+    display: block;
 }
 
 .container {
@@ -15,6 +15,9 @@ body {
     padding: 24px;
     border-radius: 12px;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+
+    /* パスワード認証前は非表示 */
+    display: none;
 }
 
 h1 {
@@ -140,11 +143,9 @@ h1 {
 }
 
 /* アイストッピングの不整合警告 */
-/* メニューカード内の警告スタイル */
 .menu-item {
     display: flex;
     flex-direction: column;
-    /* 警告をカード内下部に配置できるように縦並び対応 */
 }
 
 .menu-item-main {
@@ -171,7 +172,6 @@ h1 {
    カスタムポップアップ
    ========================================== */
 
-/* 背景 */
 .custom-popup-overlay {
     position: fixed;
     inset: 0;
@@ -188,7 +188,6 @@ h1 {
     box-sizing: border-box;
 }
 
-/* ポップアップ本体 */
 .custom-popup {
     width: min(90%, 420px);
 
@@ -208,7 +207,6 @@ h1 {
     animation: custom-popup-show 0.15s ease-out;
 }
 
-/* メッセージ */
 .custom-popup-message {
     margin-bottom: 20px;
 
@@ -222,7 +220,6 @@ h1 {
     overflow-wrap: anywhere;
 }
 
-/* OKボタン */
 .custom-popup-button {
     min-width: 100px;
 
@@ -257,8 +254,6 @@ h1 {
     outline-offset: 2px;
 }
 
-
-/* ポップアップ表示アニメーション */
 @keyframes custom-popup-show {
     from {
         opacity: 0;
@@ -393,8 +388,6 @@ h1 {
     min-height: 1.4em;
 }
 
-
-/* パスワードポップアップ表示アニメーション */
 @keyframes password-popup-show {
     from {
         opacity: 0;
