@@ -49,12 +49,47 @@
     .card-header {
       display: flex;
       justify-content: space-between;
+      align-items: center;
       border-bottom: 1px solid #eee;
       padding-bottom: 8px;
       margin-bottom: 12px;
-      font-size: 0.85em;
       color: #666;
     }
+
+    /* ★ 行番号を目立たせるスタイル */
+    .row-number {
+      font-size: 1.5em;
+      font-weight: bold;
+      color: #d9534f;
+      background-color: #fdf2f2;
+      padding: 2px 8px;
+      border-radius: 6px;
+      border: 1px solid #f5c6cb;
+    }
+
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 0.85em;
+    }
+
+    /* ★ 取消ボタンのスタイル */
+    .btn-delete {
+      padding: 5px 10px;
+      background-color: #dc3545;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-weight: bold;
+      font-size: 0.9em;
+      transition: background-color 0.2s;
+    }
+    .btn-delete:hover {
+      background-color: #bd2130;
+    }
+
     .item-list {
       list-style: none;
       padding: 0;
@@ -117,7 +152,7 @@
         }
     </script>
 </head>
-<body>
+<body style="display: none;">
 
   <header>
     <h1>注文・受渡管理モニター</h1>
@@ -156,7 +191,6 @@
       soundError.currentTime = 0;
       soundError.play().catch(err => console.warn('音声再生がブロックされました:', err));
 
-      // Chrome等でalert()が音声を止めてしまわないよう、100ms遅らせてアラートを表示
       setTimeout(() => {
         alert(message);
       }, 100);
@@ -213,8 +247,11 @@
 
         card.innerHTML = `
           <div class="card-header">
-            <span>行番号: #${order.rowIndex}</span>
-            <span>${order.timestamp}</span>
+            <span class="row-number">#${order.rowIndex}</span>
+            <div class="header-right">
+              <span>${order.timestamp}</span>
+              <button class="btn-delete" onclick="deleteOrder(${order.rowIndex})">取消</button>
+            </div>
           </div>
           <ul class="item-list">
             ${itemsHtml}
@@ -272,10 +309,7 @@
           throw new Error(result.message);
         }
 
-        // 成功音を鳴らす
         playSuccessSound();
-
-        // 反映待ち (400ms)
         await new Promise(resolve => setTimeout(resolve, 400));
 
       } catch (error) {
@@ -285,6 +319,44 @@
       } finally {
         isUpdating = false;
         checkboxes.forEach(chk => chk.disabled = false);
+        fetchOrders();
+      }
+    }
+
+    // ★ 行削除（取消）の処理
+    async function deleteOrder(rowIndex) {
+      if (!confirm(`行番号 #${rowIndex} の注文を取り消しますか？`)) {
+        return;
+      }
+
+      isUpdating = true;
+
+      try {
+        const payload = {
+          action: 'deleteRow',
+          rowIndex: rowIndex
+        };
+
+        const response = await fetch(GAS_API_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+          body: JSON.stringify(payload)
+        });
+
+        const result = await response.json();
+
+        if (result.status !== 'success') {
+          throw new Error(result.message);
+        }
+
+        playSuccessSound();
+        await new Promise(resolve => setTimeout(resolve, 400));
+
+      } catch (error) {
+        showErrorWithSound(`削除に失敗しました:\n${error.message}`);
+        console.error('Delete Error:', error);
+      } finally {
+        isUpdating = false;
         fetchOrders();
       }
     }
