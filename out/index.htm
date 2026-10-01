@@ -123,18 +123,41 @@
       setInterval(fetchOrders, AUTO_REFRESH_INTERVAL);
     };
 
-    // 注文データ一覧の取得
+// 注文データ一覧の取得
     async function fetchOrders() {
+      const container = document.getElementById('orderContainer');
       try {
         const response = await fetch(GAS_API_URL);
+        if (!response.ok) {
+          throw new Error(`HTTPエラー ステータス: ${response.status}`);
+        }
+        
         const result = await response.json();
 
         if (result.status === 'success') {
           renderOrders(result.orders);
         } else {
-          console.error('API Error:', result.message);
+          // GAS内部でエラーが発生した場合
+          container.innerHTML = `
+            <div style="color: red; padding: 20px; background: #fff; border: 2px solid red; border-radius: 8px; grid-column: 1/-1;">
+              <h3>GAS実行エラーが発生しました</h3>
+              <p>${result.message}</p>
+            </div>`;
         }
       } catch (error) {
+        // ネットワーク通信失敗やURL間違いの場合
+        container.innerHTML = `
+          <div style="color: red; padding: 20px; background: #fff; border: 2px solid red; border-radius: 8px; grid-column: 1/-1;">
+            <h3>データの取得（通信）に失敗しました</h3>
+            <p><strong>エラー内容:</strong> ${error.message}</p>
+            <hr>
+            <p><strong>【確認事項】</strong></p>
+            <ul>
+              <li>GASの「デプロイ管理」でアクセスできるユーザーが<strong>「全員」</strong>になっていますか？</li>
+              <li><code>GAS_API_URL</code> のURLが正しいですか？（末尾が <code>/exec</code> になっていますか？）</li>
+              <li>キーボードの <code>F12</code> キーを押して「コンソール (Console)」タブに赤文字で表示されている詳細エラーをご確認ください。</li>
+            </ul>
+          </div>`;
         console.error('Fetch Error:', error);
       }
     }
