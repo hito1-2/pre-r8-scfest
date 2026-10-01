@@ -4,245 +4,164 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>文化祭 厨房・受渡モニター</title>
-  <style>
-    body {
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background-color: #f4f6f9;
-      margin: 0;
-      padding: 20px;
-    }
-    header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 20px;
-    }
-    h1 { margin: 0; color: #333; }
-    .btn-refresh {
-      padding: 10px 16px;
-      background-color: #007bff;
-      color: white;
-      border: none;
-      border-radius: 6px;
-      cursor: pointer;
-      font-weight: bold;
-    }
-    .btn-refresh:hover { background-color: #0056b3; }
-    
-    /* 注文カード一覧のグリッド配置 */
-    .order-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-      gap: 16px;
-    }
-    .order-card {
-      background: #fff;
-      border-radius: 8px;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-      padding: 16px;
-      border-left: 6px solid #ffc107; /* 初期: 調理中 */
-      transition: all 0.3s ease;
-    }
-    .order-card.ordered {
-      border-left-color: #17a2b8; /* 注文確認完了 */
-    }
-    .card-header {
-      display: flex;
-      justify-content: space-between;
-      border-bottom: 1px solid #eee;
-      padding-bottom: 8px;
-      margin-bottom: 12px;
-      font-size: 0.85em;
-      color: #666;
-    }
-    .item-list {
-      list-style: none;
-      padding: 0;
-      margin: 0 0 16px 0;
-    }
-    .item-list li {
-      display: flex;
-      justify-content: space-between;
-      padding: 6px 0;
-      border-bottom: 1px dashed #f0f0f0;
-      font-size: 1.1em;
-    }
-    .item-quantity {
-      font-weight: bold;
-      color: #d9534f;
-    }
-    .card-footer {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      background: #fafafa;
-      padding: 10px;
-      border-radius: 6px;
-    }
-    .checkbox-group {
-      display: flex;
-      gap: 12px;
-    }
-    .checkbox-label {
-      display: flex;
-      align-items: center;
-      gap: 4px;
-      font-weight: bold;
-      cursor: pointer;
-    }
-    .checkbox-label input {
-      width: 18px;
-      height: 18px;
-      cursor: pointer;
-    }
-    .total-price {
-      font-weight: bold;
-      font-size: 1.1em;
-      color: #333;
-    }
-  </style>
-</head>
-<body>
-
-  <header>
-    <h1>注文・受渡管理モニター</h1>
-    <button class="btn-refresh" onclick="fetchOrders()">最新状態に更新</button>
-  </header>
-
-  <div id="orderContainer" class="order-grid">データを読み込み中...</div>
-
   <script>
-    // ★デプロイしたWebアプリのURLに差し替えてください
-    const GAS_API_URL = 'https://script.google.com/macros/s/AKfycbxJk1q9uBGcmb7N00EGJTLUKHk5QRSjyrBgYYloPVnXFgxdMPGOarhCQVlf-xQI7e9BWQ/exec';
+  // ★デプロイしたWebアプリのURL
+  const GAS_API_URL = 'https://script.google.com/macros/s/AKfycbxJk1q9uBGcmb7N00EGJTLUKHk5QRSjyrBgYYloPVnXFgxdMPGOarhCQVlf-xQI7e9BWQ/exec';
 
-    // 定期的に自動更新する間隔 (ミリ秒) - 10秒毎
-    const AUTO_REFRESH_INTERVAL = 10000;
+  // 定期更新の間隔 (10秒)
+  const AUTO_REFRESH_INTERVAL = 10000;
 
-    window.onload = () => {
-      fetchOrders();
-      setInterval(fetchOrders, AUTO_REFRESH_INTERVAL);
-    };
+  // 通信中フラグ（更新処理中に自動更新が割り込むのを防ぐ）
+  let isUpdating = false;
 
-// 注文データ一覧の取得
-    async function fetchOrders() {
-      const container = document.getElementById('orderContainer');
-      try {
-        const response = await fetch(GAS_API_URL);
-        if (!response.ok) {
-          throw new Error(`HTTPエラー ステータス: ${response.status}`);
-        }
-        
-        const result = await response.json();
+  window.onload = () => {
+    fetchOrders();
+    // 定期更新（更新処理中でない場合のみ実行）
+    setInterval(() => {
+      if (!isUpdating) {
+        fetchOrders();
+      }
+    }, AUTO_REFRESH_INTERVAL);
+  };
 
-        if (result.status === 'success') {
-          renderOrders(result.orders);
-        } else {
-          // GAS内部でエラーが発生した場合
-          container.innerHTML = `
-            <div style="color: red; padding: 20px; background: #fff; border: 2px solid red; border-radius: 8px; grid-column: 1/-1;">
-              <h3>GAS実行エラーが発生しました</h3>
-              <p>${result.message}</p>
-            </div>`;
-        }
-      } catch (error) {
-        // ネットワーク通信失敗やURL間違いの場合
+  // 注文データ一覧の取得
+  async function fetchOrders() {
+    // 他の更新処理中は自動取得を行わない
+    if (isUpdating) return;
+
+    const container = document.getElementById('orderContainer');
+    try {
+      const response = await fetch(GAS_API_URL);
+      if (!response.ok) {
+        throw new Error(`HTTPエラー ステータス: ${response.status}`);
+      }
+      
+      const result = await response.json();
+
+      if (result.status === 'success') {
+        renderOrders(result.orders);
+      } else {
         container.innerHTML = `
           <div style="color: red; padding: 20px; background: #fff; border: 2px solid red; border-radius: 8px; grid-column: 1/-1;">
-            <h3>データの取得（通信）に失敗しました</h3>
-            <p><strong>エラー内容:</strong> ${error.message}</p>
-            <hr>
-            <p><strong>【確認事項】</strong></p>
-            <ul>
-              <li>GASの「デプロイ管理」でアクセスできるユーザーが<strong>「全員」</strong>になっていますか？</li>
-              <li><code>GAS_API_URL</code> のURLが正しいですか？（末尾が <code>/exec</code> になっていますか？）</li>
-              <li>キーボードの <code>F12</code> キーを押して「コンソール (Console)」タブに赤文字で表示されている詳細エラーをご確認ください。</li>
-            </ul>
+            <h3>GAS実行エラーが発生しました</h3>
+            <p>${result.message}</p>
           </div>`;
-        console.error('Fetch Error:', error);
       }
+    } catch (error) {
+      container.innerHTML = `
+        <div style="color: red; padding: 20px; background: #fff; border: 2px solid red; border-radius: 8px; grid-column: 1/-1;">
+          <h3>データの取得に失敗しました</h3>
+          <p>${error.message}</p>
+        </div>`;
+      console.error('Fetch Error:', error);
+    }
+  }
+
+  // 画面への描画処理
+  function renderOrders(orders) {
+    const container = document.getElementById('orderContainer');
+    
+    if (!orders || orders.length === 0) {
+      container.innerHTML = '<p>現在表示する未完了の注文はありません。</p>';
+      return;
     }
 
-    // 画面への描画処理
-    function renderOrders(orders) {
-      const container = document.getElementById('orderContainer');
+    container.innerHTML = '';
+
+    orders.forEach(order => {
+      const card = document.createElement('div');
+      card.className = `order-card ${order.orderChecked ? 'ordered' : ''}`;
+      card.id = `card-${order.rowIndex}`; // カード特定用のID設定
       
-      if (!orders || orders.length === 0) {
-        container.innerHTML = '<p>現在表示する未完了の注文はありません。</p>';
-        return;
-      }
+      const itemsHtml = order.items
+        .filter(item => item.quantity > 0)
+        .map(item => `
+          <li>
+            <span>${item.name}</span>
+            <span class="item-quantity">× ${item.quantity}</span>
+          </li>
+        `).join('');
 
-      container.innerHTML = '';
-
-      orders.forEach(order => {
-        const card = document.createElement('div');
-        card.className = `order-card ${order.orderChecked ? 'ordered' : ''}`;
-        
-        // 商品リストの構築（数量が1以上のもののみ表示）
-        const itemsHtml = order.items
-          .filter(item => item.quantity > 0)
-          .map(item => `
-            <li>
-              <span>${item.name}</span>
-              <span class="item-quantity">× ${item.quantity}</span>
-            </li>
-          `).join('');
-
-        card.innerHTML = `
-          <div class="card-header">
-            <span>行番号: #${order.rowIndex}</span>
-            <span>${order.timestamp}</span>
+      card.innerHTML = `
+        <div class="card-header">
+          <span>行番号: #${order.rowIndex}</span>
+          <span>${order.timestamp}</span>
+        </div>
+        <ul class="item-list">
+          ${itemsHtml}
+        </ul>
+        <div class="card-footer">
+          <div class="checkbox-group">
+            <label class="checkbox-label">
+              <input type="checkbox" class="chk-order"
+                ${order.orderChecked ? 'checked' : ''} 
+                onchange="toggleCheck(${order.rowIndex}, 'order', this)">
+              注文確認
+            </label>
+            <label class="checkbox-label">
+              <input type="checkbox" class="chk-delivery"
+                ${order.deliveryChecked ? 'checked' : ''} 
+                onchange="toggleCheck(${order.rowIndex}, 'delivery', this)">
+              受渡確認
+            </label>
           </div>
-          <ul class="item-list">
-            ${itemsHtml}
-          </ul>
-          <div class="card-footer">
-            <div class="checkbox-group">
-              <label class="checkbox-label">
-                <input type="checkbox" 
-                  ${order.orderChecked ? 'checked' : ''} 
-                  onchange="toggleCheck(${order.rowIndex}, 'order', this.checked)">
-                注文確認
-              </label>
-              <label class="checkbox-label">
-                <input type="checkbox" 
-                  ${order.deliveryChecked ? 'checked' : ''} 
-                  onchange="toggleCheck(${order.rowIndex}, 'delivery', this.checked)">
-                受渡確認
-              </label>
-            </div>
-            <div class="total-price">¥${order.totalAmount}</div>
-          </div>
-        `;
+          <div class="total-price">¥${order.totalAmount}</div>
+        </div>
+      `;
 
-        container.appendChild(card);
+      container.appendChild(card);
+    });
+  }
+
+  // チェックボックス変更時のスプレッドシート更新処理
+  async function toggleCheck(rowIndex, target, checkboxElem) {
+    const cardElem = document.getElementById(`card-${rowIndex}`);
+    const checkboxes = cardElem.querySelectorAll('input[type="checkbox"]');
+
+    // 1. 通信中は他の操作を制限し、連打・割り込みを防ぐ
+    isUpdating = true;
+    checkboxes.forEach(chk => chk.disabled = true);
+
+    const isChecked = checkboxElem.checked;
+
+    try {
+      const payload = {
+        action: 'updateCheck',
+        rowIndex: rowIndex,
+        target: target,
+        value: isChecked
+      };
+
+      // 2. GASへ書き込みリクエスト送信
+      const response = await fetch(GAS_API_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        body: JSON.stringify(payload)
       });
-    }
 
-    // チェックボックス変更時のスプレッドシート更新処理
-    async function toggleCheck(rowIndex, target, value) {
-      try {
-        const payload = {
-          action: 'updateCheck',
-          rowIndex: rowIndex,
-          target: target, // 'order' または 'delivery'
-          value: value
-        };
+      const result = await response.json();
 
-        // GASへ更新リクエスト送信
-        await fetch(GAS_API_URL, {
-          method: 'POST',
-          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-          body: JSON.stringify(payload)
-        });
-
-        // 更新完了後に画面データを再取得して表示更新（両方チェックで自動消去される）
-        fetchOrders();
-
-      } catch (error) {
-        alert('状態の更新に失敗しました。');
-        console.error('Update Error:', error);
+      if (result.status !== 'success') {
+        throw new Error(result.message);
       }
+
+      // 3. スプレッドシート側の反映完了をわずかに待つ (400ms)
+      await new Promise(resolve => setTimeout(resolve, 400));
+
+    } catch (error) {
+      alert('状態の更新に失敗しました。元の表示に戻します。');
+      console.error('Update Error:', error);
+      // エラー時はチェック状態を元に戻す
+      checkboxElem.checked = !isChecked;
+    } finally {
+      // 4. 通信ロック解除＆チェックボックス有効化
+      isUpdating = false;
+      checkboxes.forEach(chk => chk.disabled = false);
+
+      // 5. 最新状態に画面を再描画（両方チェックなら消える）
+      fetchOrders();
     }
-  </script>
+  }
+</script>
 </body>
 </html>
