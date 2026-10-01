@@ -112,13 +112,13 @@
   <div id="orderContainer" class="order-grid">データを読み込み中...</div>
 
   <script>
-    // 先ほど提供いただいたデプロイURLを設定済みです
     const GAS_API_URL = 'https://script.google.com/macros/s/AKfycbxJk1q9uBGcmb7N00EGJTLUKHk5QRSjyrBgYYloPVnXFgxdMPGOarhCQVlf-xQI7e9BWQ/exec';
 
-    // 定期更新の間隔 (10秒)
-    const AUTO_REFRESH_INTERVAL = 10000;
+    // 音声ファイルの読み込み
+    const soundSuccess = new Audio('../success.wav');
+    const soundError = new Audio('../error.wav');
 
-    // 通信中フラグ（ロールバック・連打防止用）
+    const AUTO_REFRESH_INTERVAL = 10000; // 10秒
     let isUpdating = false;
 
     window.onload = () => {
@@ -129,6 +129,23 @@
         }
       }, AUTO_REFRESH_INTERVAL);
     };
+
+    // 成功音を鳴らす関数
+    function playSuccessSound() {
+      soundSuccess.currentTime = 0; // 連続再生用リセット
+      soundSuccess.play().catch(err => console.warn('音声再生がブロックされました:', err));
+    }
+
+    // エラー音を鳴らしてからポップアップを出す関数（Chromeブロック対策）
+    function showErrorWithSound(message) {
+      soundError.currentTime = 0;
+      soundError.play().catch(err => console.warn('音声再生がブロックされました:', err));
+
+      // Chrome等でalert()が音声を止めてしまわないよう、100ms遅らせてアラートを表示
+      setTimeout(() => {
+        alert(message);
+      }, 100);
+    }
 
     // 注文データ一覧の取得
     async function fetchOrders() {
@@ -146,18 +163,10 @@
         if (result.status === 'success') {
           renderOrders(result.orders);
         } else {
-          container.innerHTML = `
-            <div style="color: red; padding: 20px; background: #fff; border: 2px solid red; border-radius: 8px; grid-column: 1/-1;">
-              <h3>GAS実行エラーが発生しました</h3>
-              <p>${result.message}</p>
-            </div>`;
+          showErrorWithSound(`エラーが発生しました:\n${result.message}`);
         }
       } catch (error) {
-        container.innerHTML = `
-          <div style="color: red; padding: 20px; background: #fff; border: 2px solid red; border-radius: 8px; grid-column: 1/-1;">
-            <h3>データの取得に失敗しました</h3>
-            <p>${error.message}</p>
-          </div>`;
+        showErrorWithSound(`データの取得に失敗しました:\n${error.message}`);
         console.error('Fetch Error:', error);
       }
     }
@@ -218,12 +227,11 @@
       });
     }
 
-    // チェックボックス変更時の処理（ロールバック対策付き）
+    // チェックボックス変更時の処理
     async function toggleCheck(rowIndex, target, checkboxElem) {
       const cardElem = document.getElementById(`card-${rowIndex}`);
       const checkboxes = cardElem.querySelectorAll('input[type="checkbox"]');
 
-      // 1. 操作ロック・連打防止
       isUpdating = true;
       checkboxes.forEach(chk => chk.disabled = true);
 
@@ -237,7 +245,6 @@
           value: isChecked
         };
 
-        // 2. GASへデータ更新リクエスト
         const response = await fetch(GAS_API_URL, {
           method: 'POST',
           headers: { 'Content-Type': 'text/plain;charset=utf-8' },
@@ -250,15 +257,17 @@
           throw new Error(result.message);
         }
 
-        // 3. スプレッドシート側の反映待ち (400ms)
+        // 成功音を鳴らす
+        playSuccessSound();
+
+        // 反映待ち (400ms)
         await new Promise(resolve => setTimeout(resolve, 400));
 
       } catch (error) {
-        alert('状態の更新に失敗しました。元の表示に戻します。');
+        checkboxElem.checked = !isChecked; // 元に戻す
+        showErrorWithSound(`状態の更新に失敗しました:\n${error.message}`);
         console.error('Update Error:', error);
-        checkboxElem.checked = !isChecked;
       } finally {
-        // 4. ロック解除 & 再取得（両方チェックで自動非表示）
         isUpdating = false;
         checkboxes.forEach(chk => chk.disabled = false);
         fetchOrders();
