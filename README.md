@@ -1,19 +1,17 @@
 # pre-r8-scfest
-## 文化祭の会計用の動作確認用
+## 利用方法（導入後/デフォルト）
 
-- テスト環境： https://r8fest.client.jp/test
 - 確認用（試験的なため編集不可）
 https://docs.google.com/spreadsheets/d/18BsQaiyHCnNE8SpnwPJP4gDF_SKURpKJZSKtQrdHwqQ/edit?usp=sharing
 
-- パスワード(誤アクセス防止のパスワードなので、セキュリティは気にしていない)：test
+- パスワード(誤アクセス防止のパスワードなので、セキュリティは気にしていない)：`test`
 
-## 本番環境
-当日利用可能な，本番システムです。
-- https://r8fest.client.jp/
+## 導入方法
 
-## 参考
-- https://share.gemini.google/k07RFGllE6uP
-- https://gemini.google.com/share/d/1T925kg3KXx8JeflhwPWn2BjLT0ICqoSM
-- https://ai.rakuten.co.jp/share/6ab67f91aa01ac2ac981ca49?utm_source=copylink
-- https://share.gemini.google/5WnubQpsRAYi
-- https://chatgpt.com/share/6abd086f-9734-83e8-a76b-c0529e0c2853
+- `Code.gs`はGoogle Spreadsheetに導入してください。
+- 品目，GASのURLを調整してご利用ください。
+
+## 利用したAI
+- Google Gemini
+- ChatGPT
+- Rakuten AI
